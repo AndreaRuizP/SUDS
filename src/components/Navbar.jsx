@@ -9,6 +9,7 @@ export default function Navbar({ onLogout }) {
     { id: 'importar', label: 'Importar Datos', iconClass: 'fi fi-rr-file-import', path: '/' },
     { id: 'calcular', label: 'Calcular Escorrentía', iconClass: 'fi fi-rr-water', path: '/calcular' },
     { id: 'analisis', label: 'Análisis Visual', icon: 'droplet', path: '/analisis' },
+    { id: 'historial', label: 'Historial', iconClass: 'fi fi-rr-clock', path: '/historial' },
   ];
 
   const DropletIcon = () => (

@@ -8,6 +8,7 @@ import Calcular from './pages/Calcular';
 import Analisis from './pages/Analisis';
 import HydroVisual from './components/HydroVisual';
 import IDBChart from './components/IDFChart';
+import Historial from './pages/Historial';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -41,6 +42,7 @@ function App() {
               <Route path="/" element={<ImportarDatos />} />
               <Route path="/calcular" element={<Calcular />} />
              <Route path="/analisis" element={<Analisis />} />
+              <Route path="/historial" element={<Historial />} />
             </Routes>
           </main>
         </div>
