@@ -28,7 +28,7 @@ export default function IDFChart({
     {
       label: "T = 10 años",
       data: [0],
-      borderColor: "#f87171", // rojo
+      borderColor: "#f87171",
       backgroundColor: "rgba(248,113,113,0.09)",
       pointBorderColor: "#f87171",
       pointBackgroundColor: "#fff",
@@ -37,7 +37,7 @@ export default function IDFChart({
       borderWidth: 2,
       pointRadius: 6,
       pointHoverRadius: 8,
-      showLine: true,
+      showLine: true
     }
   ]
 }) {
@@ -46,47 +46,68 @@ export default function IDFChart({
   const options = {
     responsive: true,
     plugins: {
-      legend: {
-        display: true,
-        position: "bottom"
-      },
-      title: { display: false }
+      legend: { display: true, position: "bottom" }
     },
     scales: {
       x: {
-        title: { display: true, text: "Duración (min)" }
+        title: { display: true, text: "Duración (min)", color: "#475569" },
+        grid: { color: "#f1f5f9" },
+        ticks: { color: "#475569" }
       },
       y: {
         beginAtZero: true,
         suggestedMax: 320,
-        title: { display: true, text: "Intensidad (mm/h)" }
+        title: { display: true, text: "Intensidad (mm/h)", color: "#475569" },
+        grid: { color: "#f1f5f9" },
+        ticks: { color: "#475569" }
       }
     },
     elements: {
-      point: {
-        borderWidth: 2,
-        radius: 6,
-        backgroundColor: "#fff"
-      },
-      line: {
-        borderWidth: 2
-      }
+      point: { borderWidth: 2, radius: 6, backgroundColor: "#fff" },
+      line: { borderWidth: 2 }
     }
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-8 mt-12">
-      <div className="flex items-center gap-3 mb-1">
-        <div className="bg-blue-600 text-white p-2 rounded-lg">
-          <i className="fi fi-rr-trend-up text-xl"></i>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mt-12">
+      <div className="px-8 py-6 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-600 text-white p-2 rounded-lg">
+            <i className="fi fi-rr-trend-up text-xl"></i>
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 leading-tight">
+              {title}
+            </h2>
+            <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>
+          </div>
         </div>
-        <span className="text-2xl font-bold text-gray-900">{title}</span>
       </div>
-      <div className="text-gray-600 mb-8 mt-1">
-        {subtitle}
-      </div>
-      <div className="w-full min-h-[380px] bg-white pt-2 pb-6 px-2">
-        <Line data={data} options={options} />
+
+      <div className="px-8 py-6">
+        <div className="flex flex-wrap gap-2 mb-5">
+          {datasets.map((ds) => (
+            <span
+              key={ds.label}
+              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border"
+              style={{
+                color: ds.borderColor,
+                backgroundColor: ds.backgroundColor ?? `${ds.borderColor}15`,
+                borderColor: `${ds.borderColor}40`
+              }}
+            >
+              <span
+                className="inline-block w-2.5 h-2.5 rounded-full"
+                style={{ backgroundColor: ds.borderColor }}
+              />
+              {ds.label}
+            </span>
+          ))}
+        </div>
+
+        <div className="w-full min-h-[360px] pb-2">
+          <Line data={data} options={options} />
+        </div>
       </div>
     </div>
   );

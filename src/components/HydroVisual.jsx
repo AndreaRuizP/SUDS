@@ -25,16 +25,9 @@ ChartJS.register(
 
 const hydroData = {
   labels: [
-    "2024-01-15",
-    "2024-01-22",
-    "2024-02-05",
-    "2024-02-18",
-    "2024-03-03",
-    "2024-03-14",
-    "2024-04-01",
-    "2024-04-20",
-    "2024-05-08",
-    "2024-05-25"
+    "2024-01-15", "2024-01-22", "2024-02-05", "2024-02-18",
+    "2024-03-03", "2024-03-14", "2024-04-01", "2024-04-20",
+    "2024-05-08", "2024-05-25"
   ],
   precipitacion: [0],
   intensidad: [0],
@@ -46,33 +39,41 @@ const tabInfo = {
     label: "Precipitación (mm)",
     dataKey: "precipitacion",
     color: "#3b82f6",
-    chartType: "bar"
+    chartType: "bar",
+    icon: "fi-rr-cloud-rain",
+    description: "Acumulado diario de precipitación"
   },
   Intensidad: {
     label: "Intensidad (mm/h)",
     dataKey: "intensidad",
     color: "#f59e42",
-    chartType: "line"
+    chartType: "line",
+    icon: "fi-rr-bolt",
+    description: "Tasa de precipitación por hora"
   },
   Duración: {
     label: "Duración (min)",
     dataKey: "duracion",
     color: "#10b981",
-    chartType: "bar"
+    chartType: "bar",
+    icon: "fi-rr-clock",
+    description: "Duración del evento de lluvia"
   }
 };
 
 export default function HydroVisualAnalysis() {
   const [selectedTab, setSelectedTab] = useState("Precipitación");
+  const active = tabInfo[selectedTab];
+
   const chartData =
-    tabInfo[selectedTab].chartType === "bar"
+    active.chartType === "bar"
       ? {
           labels: hydroData.labels,
           datasets: [
             {
-              label: tabInfo[selectedTab].label,
-              data: hydroData[tabInfo[selectedTab].dataKey],
-              backgroundColor: tabInfo[selectedTab].color
+              label: active.label,
+              data: hydroData[active.dataKey],
+              backgroundColor: active.color
             }
           ]
         }
@@ -80,11 +81,11 @@ export default function HydroVisualAnalysis() {
           labels: hydroData.labels,
           datasets: [
             {
-              label: tabInfo[selectedTab].label,
-              data: hydroData[tabInfo[selectedTab].dataKey],
-              borderColor: tabInfo[selectedTab].color,
+              label: active.label,
+              data: hydroData[active.dataKey],
+              borderColor: active.color,
               backgroundColor: "#fff",
-              pointBorderColor: tabInfo[selectedTab].color,
+              pointBorderColor: active.color,
               pointBackgroundColor: "#fff",
               pointRadius: 5,
               pointHoverRadius: 7,
@@ -103,15 +104,11 @@ export default function HydroVisualAnalysis() {
     },
     scales: {
       x: {
-        ticks: {
-          color: "#475569",
-          maxRotation: 40,
-          minRotation: 40
-        },
+        ticks: { color: "#475569", maxRotation: 40, minRotation: 40 },
         grid: { color: "#f1f5f9" }
       },
       y: {
-        title: { display: true, text: tabInfo[selectedTab].label, color: "#475569" },
+        title: { display: true, text: active.label, color: "#475569" },
         beginAtZero: true,
         grid: { color: "#f1f5f9" }
       }
@@ -119,48 +116,60 @@ export default function HydroVisualAnalysis() {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-8 mt-12">
-      <div className="flex items-center gap-3 mb-1">
-        <div className="bg-blue-600 text-white p-2 rounded-lg">
-          <i className="fi fi-rr-bar-chart text-xl"></i>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mt-12">
+      <div className="px-8 py-6 border-b border-gray-100">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="bg-blue-600 text-white p-2 rounded-lg">
+            <i className="fi fi-rr-bar-chart text-xl"></i>
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 leading-tight">
+              Análisis Visual de Datos Hidrometeorológicos
+            </h2>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Datos de precipitación e intensidad — Santa Marta, Colombia
+            </p>
+          </div>
         </div>
-        <span className="text-2xl font-bold text-gray-900">
-          Análisis Visual de Datos Hidrometeorológicos
-        </span>
       </div>
-      <div className="text-gray-600 mb-8 mt-1">
-        Datos de precipitación e intensidad - Santa Marta, Colombia
-      </div>
-      <div className="flex bg-gray-100 rounded-xl mb-6 overflow-hidden">
-        {Object.keys(tabInfo).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setSelectedTab(tab)}
-            className={
-              "flex-1 py-2 px-2 font-semibold transition " +
-              (selectedTab === tab
-                ? "bg-white text-blue-700 shadow-inner rounded-xl border-2 border-gray-200"
-                : "text-gray-500 hover:bg-gray-200")
-            }
-            style={{
-              boxShadow:
-                selectedTab === tab
-                  ? "0 1px 8px 0 rgba(0,0,0,0.05) inset"
-                  : undefined,
-              borderBottom:
-                selectedTab === tab ? "3px solid #2563eb" : undefined
-            }}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-      <div className="w-full min-h-[350px] bg-white pt-2 pb-6 px-2">
-        {tabInfo[selectedTab].chartType === "bar" ? (
-          <Bar data={chartData} options={options} />
-        ) : (
-          <Line data={chartData} options={options} />
-        )}
+
+      <div className="px-8 py-6">
+        <div className="flex gap-2 mb-6">
+          {Object.entries(tabInfo).map(([tab, info]) => {
+            const isActive = selectedTab === tab;
+            return (
+              <button
+                key={tab}
+                onClick={() => setSelectedTab(tab)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+                  isActive
+                    ? "bg-blue-50 text-blue-700 border border-blue-200"
+                    : "text-gray-500 hover:bg-gray-100 border border-transparent"
+                }`}
+              >
+                <i className={`fi ${info.icon} text-base`}></i>
+                {tab}
+              </button>
+            );
+          })}
+        </div>
+        <div
+          className="flex items-center gap-2 text-sm font-medium mb-5 px-3 py-2 rounded-lg w-fit"
+          style={{ backgroundColor: `${active.color}15`, color: active.color }}
+        >
+          <span
+            className="inline-block w-2.5 h-2.5 rounded-full"
+            style={{ backgroundColor: active.color }}
+          />
+          {active.description}
+        </div>
+        <div className="w-full min-h-[340px] pb-2">
+          {active.chartType === "bar" ? (
+            <Bar data={chartData} options={options} />
+          ) : (
+            <Line data={chartData} options={options} />
+          )}
+        </div>
       </div>
     </div>
   );

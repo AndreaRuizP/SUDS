@@ -1,12 +1,53 @@
-import { useRef } from 'react';
+import { useRef } from "react";
+import Papa from "papaparse";
+import { useImportData } from "../context/ImportDataContext";
+
+// Nombres amigables para los datos de la estación
+const STATION_HEADERS = [
+  "N.º",
+  "Fecha",
+  "Contenido de agua (m³/m³)",
+  "Radiación solar (W/m²)",
+  "Temperatura (°C)",
+  "Humedad (%)",
+  "Viento (m/s)",
+  "Viento ráf. (m/s)",
+  "Dir. viento (°)",
+  "Precipitación (mm)"
+];
 
 export default function ImportarDatos() {
   const fileInputRef = useRef(null);
+  const { setImportedData, setFileName } = useImportData();
 
   function handleCsvChange(e) {
     const file = e.target.files[0];
     if (file) {
-      alert(`Archivo seleccionado: ${file.name}`);
+      setFileName(file.name);
+
+      Papa.parse(file, {
+        delimiter: ";",
+        skipEmptyLines: true,
+        complete: function (results) {
+          const dataRows = results.data.filter(row =>
+            /^[0-9]+$/.test((row[0] || "").trim())
+          );
+          const datosProcesados = dataRows.map(row => ({
+            "N.º": row[0] || "",
+            "Fecha": row[1] || "",
+            "Contenido de agua (m³/m³)": row[2] || "",
+            "Radiación solar (W/m²)": row[3] || "",
+            "Temperatura (°C)": row[4] || "",
+            "Humedad (%)": row[5] || "",
+            "Viento (m/s)": row[6] || "",
+            "Viento ráf. (m/s)": row[7] || "",
+            "Dir. viento (°)": row[8] || "",
+            "Precipitación (mm)": row[9] || ""
+          }));
+
+          setImportedData(datosProcesados);
+        },
+      });
     }
   }
 
@@ -28,7 +69,6 @@ export default function ImportarDatos() {
             Cargue datos de la estación en formato CSV o utilice datos del IDEAM
           </p>
           <div className="space-y-4 mb-8">
-            {/* Botón de cargar CSV */}
             <button
               className="w-full border-2 border-blue-500 text-blue-600 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-blue-50 transition"
               onClick={handleButtonClick}
@@ -45,10 +85,10 @@ export default function ImportarDatos() {
               onChange={handleCsvChange}
             />
           </div>
-          <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+          <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mb-6">
             <h3 className="font-semibold text-gray-900 mb-3">Formato CSV esperado:</h3>
             <code className="text-sm text-gray-700 block bg-white p-3 rounded border border-gray-200 mb-3 font-mono">
-              fecha, precipitacion, intensidad, duracion
+              N.º;Fecha;Contenido de agua;Radiación;Temp;Humedad;Vel. viento;Vel. ráfaga;Dir. viento;Precipitación
             </code>
           </div>
         </div>
