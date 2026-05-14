@@ -1,6 +1,21 @@
+import { useRef } from 'react';
+
 export default function ImportarDatos() {
+  const fileInputRef = useRef(null);
+
+  function handleCsvChange(e) {
+    const file = e.target.files[0];
+    if (file) {
+      alert(`Archivo seleccionado: ${file.name}`);
+    }
+  }
+
+  function handleButtonClick() {
+    fileInputRef.current?.click();
+  }
+
   return (
-    <main className=" py-8 px-8 flex-1">
+    <main className="py-8 px-8 flex-1">
       <div className="grid grid-cols-3 gap-8">
         <div className="col-span-2 bg-white rounded-2xl p-8 shadow-sm border border-gray-200">
           <div className="flex items-center gap-3 mb-6">
@@ -13,10 +28,22 @@ export default function ImportarDatos() {
             Cargue datos de la estación en formato CSV o utilice datos del IDEAM
           </p>
           <div className="space-y-4 mb-8">
-            <button className="w-full border-2 border-blue-500 text-blue-600 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-blue-50 transition">
+            {/* Botón de cargar CSV */}
+            <button
+              className="w-full border-2 border-blue-500 text-blue-600 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-blue-50 transition"
+              onClick={handleButtonClick}
+              type="button"
+            >
               <i className="fi fi-rr-file-upload"></i>
               Cargar archivo .CSV
             </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              className="hidden"
+              onChange={handleCsvChange}
+            />
           </div>
           <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
             <h3 className="font-semibold text-gray-900 mb-3">Formato CSV esperado:</h3>
