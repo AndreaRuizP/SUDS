@@ -9,6 +9,7 @@ export default function Navbar({ onLogout }) {
     { id: 'importar', label: 'Importar Datos', iconClass: 'fi fi-rr-file-import', path: '/' },
     { id: 'calcular', label: 'Calcular Escorrentía', iconClass: 'fi fi-rr-water', path: '/calcular' },
     { id: 'analisis', label: 'Análisis Visual', icon: 'droplet', path: '/analisis' },
+    { id: 'tablero', label: 'Tablero General', iconClass: 'fi fi-rr-dashboard', path: '/tablero' },
     { id: 'historial', label: 'Historial', iconClass: 'fi fi-rr-clock', path: '/historial' },
   ];
 
@@ -30,7 +31,7 @@ export default function Navbar({ onLogout }) {
   };
 
   return (
-    <aside className="bg-white border-r border-gray-200 w-72 px-6 py-8 flex flex-col justify-between">
+    <aside className="bg-white border-r border-gray-200 w-72 px-6 py-8 flex flex-col justify-between print:hidden">
       <div className="flex flex-col gap-4">
         {navItems.map((item) => (
           <button

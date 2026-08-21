@@ -1,6 +1,6 @@
 export default function Header() {
   return (
-    <header className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-600 py-6 px-8">
+    <header className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-600 py-6 px-8 print:hidden">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div>

@@ -1,10 +1,23 @@
 import { useState, useEffect, useCallback } from "react";
 import api from "../api/client";
+import CompareCalculos from "../components/CompareCalculos";
+import { exportCalculosToCsv } from "../utils/export";
+
+const MAX_COMPARE = 4;
 
 export default function Historial() {
   const [historial, setHistorial] = useState([]);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState("");
+  const [compareIds, setCompareIds] = useState([]);
+
+  function toggleCompare(id) {
+    setCompareIds((prev) => {
+      if (prev.includes(id)) return prev.filter((i) => i !== id);
+      if (prev.length >= MAX_COMPARE) return prev;
+      return [...prev, id];
+    });
+  }
 
   const fetchHistorial = useCallback(async () => {
     setLoading(true);
@@ -25,6 +38,7 @@ export default function Historial() {
     try {
       await api.delete(`/calculations/history/${id}`);
       setHistorial(prev => prev.filter(h => h.id !== id));
+      setCompareIds(prev => prev.filter(i => i !== id));
     } catch {
       setError("Error al eliminar el cálculo.");
     }
@@ -35,6 +49,7 @@ export default function Historial() {
     try {
       await api.delete("/calculations/history");
       setHistorial([]);
+      setCompareIds([]);
     } catch {
       setError("Error al limpiar el historial.");
     }
@@ -62,15 +77,40 @@ export default function Historial() {
             </p>
           </div>
         </div>
-        <button
-          onClick={handleClearAll}
-          disabled={historial.length === 0}
-          className="flex items-center gap-2 bg-red-500 text-white font-semibold px-5 py-2 rounded-xl shadow hover:bg-red-600 mt-4 sm:mt-0 disabled:opacity-40 transition"
-        >
-          <i className="fi fi-rr-trash"></i>
-          Limpiar Historial
-        </button>
+        <div className="flex items-center gap-3 mt-4 sm:mt-0">
+          <button
+            onClick={() => exportCalculosToCsv(historial)}
+            disabled={historial.length === 0}
+            className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 font-semibold px-5 py-2 rounded-xl shadow-sm hover:bg-gray-50 disabled:opacity-40 transition"
+          >
+            <i className="fi fi-rr-file-export"></i>
+            Exportar a Excel (.csv)
+          </button>
+          <button
+            onClick={handleClearAll}
+            disabled={historial.length === 0}
+            className="flex items-center gap-2 bg-red-500 text-white font-semibold px-5 py-2 rounded-xl shadow hover:bg-red-600 disabled:opacity-40 transition"
+          >
+            <i className="fi fi-rr-trash"></i>
+            Limpiar Historial
+          </button>
+        </div>
       </div>
+
+      {compareIds.length >= 2 && (
+        <CompareCalculos
+          calculos={historial.filter(h => compareIds.includes(h.id))}
+          onRemove={(id) => toggleCompare(id)}
+          onClear={() => setCompareIds([])}
+        />
+      )}
+
+      {compareIds.length === 1 && (
+        <div className="bg-blue-50 border border-blue-200 text-blue-700 text-sm rounded-xl px-5 py-3 mb-6 flex items-center gap-2">
+          <i className="fi fi-rr-info"></i>
+          Selecciona al menos un cálculo más para comparar.
+        </div>
+      )}
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-5 py-3 mb-6">{error}</div>
@@ -88,13 +128,28 @@ export default function Historial() {
         </div>
       )}
 
-      {historial.map((h) => (
+      {historial.map((h) => {
+        const isSelected = compareIds.includes(h.id);
+        return (
         <div
           key={h.id}
-          className="bg-white border rounded-2xl shadow p-6 mb-8 flex flex-col gap-4 hover:shadow-lg transition"
+          className={`bg-white border rounded-2xl shadow p-6 mb-8 flex flex-col gap-4 hover:shadow-lg transition ${isSelected ? "ring-2 ring-blue-400 border-blue-300" : ""}`}
         >
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
+              <label
+                className="flex items-center gap-2 text-xs font-semibold text-gray-500 cursor-pointer select-none"
+                title="Seleccionar para comparar"
+              >
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleCompare(h.id)}
+                  disabled={!isSelected && compareIds.length >= MAX_COMPARE}
+                  className="w-4 h-4 accent-blue-600"
+                />
+                Comparar
+              </label>
               <div className="bg-blue-500 text-white p-3 rounded-lg">
                 <i className="fi fi-rr-cloud text-2xl"></i>
               </div>
@@ -153,7 +208,8 @@ export default function Historial() {
             </div>
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

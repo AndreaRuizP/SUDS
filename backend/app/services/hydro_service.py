@@ -12,6 +12,7 @@ import numpy as np
 from typing import Any
 from sqlalchemy.orm import Session
 from app.models.station_data import StationUpload, StationRecord
+from app.models.calculation import Calculation
 
 DURATIONS_MIN = [5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240]
 RETURN_PERIODS = [10, 20, 50]
@@ -89,9 +90,74 @@ def get_hydro_chart_data(db: Session, user_id: int) -> dict[str, Any]:
     }
 
 
+def get_dashboard_data(db: Session, user_id: int) -> dict[str, Any]:
+    """Aggregate stats/series across ALL of a user's uploads and calculations."""
+    uploads = (
+        db.query(StationUpload)
+        .filter(StationUpload.user_id == user_id)
+        .order_by(StationUpload.upload_date.desc())
+        .all()
+    )
+    calculations = (
+        db.query(Calculation)
+        .filter(Calculation.user_id == user_id)
+        .order_by(Calculation.fecha.asc())
+        .all()
+    )
+
+    precip_arr = np.array(_load_all_precipitation(db, user_id))
+    caudal_arr = np.array([c.caudal_maximo for c in calculations])
+
+    superficie_counts: dict[str, int] = {}
+    periodo_counts: dict[str, int] = {}
+    for c in calculations:
+        superficie_counts[c.tipo_superficie] = superficie_counts.get(c.tipo_superficie, 0) + 1
+        periodo_counts[c.periodo_retorno] = periodo_counts.get(c.periodo_retorno, 0) + 1
+
+    recent_calcs = calculations[-30:]
+
+    return {
+        "kpis": {
+            "total_estaciones": len(uploads),
+            "total_registros": sum(u.row_count for u in uploads),
+            "total_calculos": len(calculations),
+            "precipitacion_promedio": round(float(precip_arr.mean()), 2) if precip_arr.size else 0.0,
+            "precipitacion_maxima": round(float(precip_arr.max()), 2) if precip_arr.size else 0.0,
+            "caudal_promedio": round(float(caudal_arr.mean()), 2) if caudal_arr.size else 0.0,
+            "caudal_maximo": round(float(caudal_arr.max()), 2) if caudal_arr.size else 0.0,
+        },
+        "uploads_recientes": uploads[:5],
+        "calculos_series": {
+            "labels": [c.fecha.isoformat() for c in recent_calcs],
+            "caudal_maximo": [c.caudal_maximo for c in recent_calcs],
+        },
+        "superficie_distribucion": {
+            "labels": list(superficie_counts.keys()),
+            "valores": list(superficie_counts.values()),
+        },
+        "periodo_distribucion": {
+            "labels": list(periodo_counts.keys()),
+            "valores": list(periodo_counts.values()),
+        },
+    }
+
+
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
+
+def _load_all_precipitation(db: Session, user_id: int) -> list[float]:
+    rows = (
+        db.query(StationRecord.precipitation)
+        .join(StationUpload, StationRecord.upload_id == StationUpload.id)
+        .filter(
+            StationUpload.user_id == user_id,
+            StationRecord.precipitation.isnot(None),
+        )
+        .all()
+    )
+    return [r.precipitation for r in rows]
+
 
 def _load_precipitation(db: Session, user_id: int) -> list[float]:
     upload = (

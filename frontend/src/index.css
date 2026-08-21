@@ -13,3 +13,10 @@ html, body, #root {
   width: 100%;
   overflow: hidden;
 }
+
+@media print {
+  html, body, #root, .app-shell, .app-body, .app-main {
+    height: auto !important;
+    overflow: visible !important;
+  }
+}

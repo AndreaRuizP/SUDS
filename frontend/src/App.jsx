@@ -8,6 +8,7 @@ import ImportarDatos from './pages/ImportarDatos';
 import Calcular from './pages/Calcular';
 import Analisis from './pages/Analisis';
 import Historial from './pages/Historial';
+import Tablero from './pages/Tablero';
 
 function AppContent() {
   const { isAuthenticated, logout } = useAuth();
@@ -24,15 +25,16 @@ function AppContent() {
 
   return (
     <Router>
-      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div className="app-shell" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <Header />
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <div className="app-body" style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
           <Navbar onLogout={logout} />
-          <main style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+          <main className="app-main" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
             <Routes>
               <Route path="/" element={<ImportarDatos />} />
               <Route path="/calcular" element={<Calcular />} />
               <Route path="/analisis" element={<Analisis />} />
+              <Route path="/tablero" element={<Tablero />} />
               <Route path="/historial" element={<Historial />} />
             </Routes>
           </main>
